@@ -22,5 +22,3 @@ getParams(url)
 getParams(urlTwo)
 getParams(urlThree)
 
-// console.log(hostname(url))
-
