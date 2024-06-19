@@ -10,7 +10,6 @@ const modal = {
   addToCartBtn: document.querySelector(".addBtn"),
   decrementBtnM: 0,
   incrementBtnM: 0,
-  addedProduct: {},
   amountInput: 0,
 
   modalTemplate: `<img
@@ -50,6 +49,7 @@ const modal = {
 
   modalOn: function () {
     let template = Handlebars.compile(this.modalTemplate);
+    let addedProduct
 
     document.querySelectorAll(".product").forEach((product) => {
       product.addEventListener("click", (event) => {
@@ -58,8 +58,9 @@ const modal = {
 
         products.products.forEach((elem) => {
           if (elem.id == product.id) {
-            this.modalBody.innerHTML = template(elem);
-            this.addedProduct = elem;
+            addedProduct = elem;
+            this.modalBody.innerHTML = template(addedProduct);
+
             this.amountInput = document.querySelector(".amountInput");
             this.decrementBtnM = document.getElementById(
               "decrement-button-modal"
@@ -67,24 +68,24 @@ const modal = {
             this.incrementBtnM = document.getElementById(
               "increment-button-modal"
             );
-            this.addedProduct.total = this.addedProduct.price;
+            addedProduct.total = addedProduct.price;
 
             // кнопка -
             this.decrementBtnM.addEventListener("click", (event) => {
-              if (this.addedProduct.amount == 1) {
+              if (addedProduct.amount == 1) {
                 alert("Sorry, you cannot add zero products in cart");
               } else {
                 this.amountInput.value = +this.amountInput.value - 1;
-                this.addedProduct.amount = this.amountInput.value;
-                this.addedProduct.total = this.addedProduct.amount * this.addedProduct.price;
+                addedProduct.amount = this.amountInput.value;
+                addedProduct.total = addedProduct.amount * addedProduct.price;
               }
             });
 
             // кнопка +
             this.incrementBtnM.addEventListener("click", (event) => {
               this.amountInput.value = +this.amountInput.value + 1;
-              this.addedProduct.amount = this.amountInput.value;
-              this.addedProduct.total = this.addedProduct.amount * this.addedProduct.price;
+              addedProduct.amount = this.amountInput.value;
+              addedProduct.total = addedProduct.amount * addedProduct.price;
             });
           }
         });
@@ -92,7 +93,35 @@ const modal = {
     });
 
     this.addToCartBtn.addEventListener("click", (event) => {
-      this.addToCart()
+      let basket = [];
+
+      if (!window.localStorage.getItem("basket")) {
+
+        basket.push(addedProduct);
+        window.localStorage.setItem("basket", JSON.stringify(basket));
+        
+      } else {
+
+        basket = JSON.parse(window.localStorage.getItem("basket"));
+        let allId = []
+
+        basket.forEach((elem) => {
+          allId.push(elem.id)
+        })
+        
+        if (allId.includes(addedProduct.id)) {
+          alert("This product is alredy in the cart")
+        } else {
+          basket.push(addedProduct);
+          window.localStorage.setItem("basket", JSON.stringify(basket));
+        }        
+      }
+
+      
+
+      cart.cartIconOnOff();
+
+      this.modalExit();
     });
 
     this.modalOff();
@@ -110,24 +139,6 @@ const modal = {
     this.modalField.classList.add("hidden");
   },
 
-  addToCart: function () {
-    let basket = [];
-    
-    if (window.localStorage.getItem("basket")) {
-      basket = JSON.parse(window.localStorage.getItem("basket")); 
-
-      basket.push(this.addedProduct);
-      
-    } else {
-      basket.push(this.addedProduct);
-    }
-
-    window.localStorage.setItem("basket", JSON.stringify(basket));
-   
-    cart.cartIconOnOff()
-
-    this.modalExit();
-  },
 };
 
 export { modal };
